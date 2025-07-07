@@ -11,19 +11,21 @@
 
   html, body {
     @apply h-full;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  /* --- CHANGE: Updated background and text colors for a softer, more modern feel --- */
   body {
-    @apply bg-white text-black dark:bg-black dark:text-white;
+    @apply bg-slate-50 text-slate-800;
+    @apply dark:bg-slate-950 dark:text-slate-200;
   }
 
+  /* Keep the smooth transition for all elements */
   * {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    @apply transition-colors duration-300 ease-in-out;
   }
 }
 
-/* Add to your globals.css */
+/* --- No changes needed here, these utility classes are great --- */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

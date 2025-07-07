@@ -13,6 +13,15 @@ export const getTopBroadcasts = async (page = 1) => {
   return response.data; 
 };
 
+export const getBroadcast = async (id: string) => { 
+  const response = await lichessApi.get(`/broadcast/${id}`, { 
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+  console.log(response.data);
+  return response.data;
+};
 
 export const getBroadcasts = async () => {
   const response = await lichessApi.get('/broadcast', {

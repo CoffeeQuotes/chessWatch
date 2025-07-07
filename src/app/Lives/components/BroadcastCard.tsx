@@ -1,77 +1,85 @@
-// src/components/BroadcastCard.tsx
 'use client';
 
 import { useState } from 'react';
-import Image from './ChessImage'
+import Image from './ChessImage';
+
+// Icons remain the same as they are clean and theme-agnostic
+const Icon = ({ path, className }: { path: string; className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    className={`w-5 h-5 ${className}`}
+  >
+    <path fillRule="evenodd" d={path} clipRule="evenodd" />
+  </svg>
+);
+
+const CrownIcon = () => <Icon className="text-slate-500" path="M10 2a.75.75 0 01.684.445l1.928 4.242a.75.75 0 00.56.41l4.676.334a.75.75 0 01.417 1.28l-3.52 3.01a.75.75 0 00-.224.64l1.04 4.544a.75.75 0 01-1.11.822L10.37 15.3a.75.75 0 00-.74 0l-4.12 2.45a.75.75 0 01-1.11-.822l1.04-4.543a.75.75 0 00-.224-.64l-3.52-3.01a.75.75 0 01.417-1.28l4.676-.334a.75.75 0 00.56-.41L9.316 2.445A.75.75 0 0110 2z" />;
+const ArrowRightIcon = () => <Icon className="group-hover:translate-x-0.5 transition-transform" path="M9.22 4.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L12.94 10 9.22 6.28a.75.75 0 010-1.06z" />;
 
 export default function BroadcastCard({ item }: { item: any }) {
   const [isHovered, setIsHovered] = useState(false);
   const [imgSrc, setImgSrc] = useState(item.tour.image || "/chess-fallback.png");
-  
+
+  const { tour, round } = item;
+  const isLive = round?.finished === false;
+  const playersDisplay = (tour.info?.players || 'Top Players').split(/[,;]/).map(p => p.trim()).join(', ');
+
   return (
-    <div 
-      className="relative bg-gradient-to-br from-blue-50 to-purple-50 dark:from-neutral-800 dark:to-neutral-900 border border-blue-100 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+    // CHANGE: Adjusted colors to match your dark theme (bg-slate-900). Rounded-xl for softer corners.
+    <div
+      className="flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-44 w-full overflow-hidden">
         <Image
           src={imgSrc}
-          alt={item.tour.name}
+          alt={tour.name}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className={`transition-transform duration-500 ${
-            isHovered ? 'scale-110' : 'scale-100'
-          } object-cover`}
+          sizes="340px"
+          className={`object-cover transition-transform duration-500 ease-in-out ${isHovered ? 'scale-105' : 'scale-100'}`}
           onError={() => setImgSrc("/chess-fallback.png")}
           unoptimized={imgSrc.startsWith("https://image.lichess1.org")}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        <div className="absolute bottom-3 left-3 right-3">
-          <div className="flex justify-between items-center">
-            <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-              {item.round.type || 'Tournament'}
-            </span>
-            {item.status === 'live' && (
-              <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
-                LIVE
-              </span>
-            )}
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
 
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-base font-bold text-neutral-800 dark:text-white truncate">
-            {item.tour.name}
+      <div className="p-4 flex flex-col flex-grow">
+        {/* Main Info */}
+        <div className="space-y-1">
+          <span className="text-xs font-medium text-blue-500 dark:text-blue-400">{round.name}</span>
+          {/* FIX: Added `truncate` class to prevent the title from stretching the card */}
+          <h2 className="font-semibold text-slate-800 dark:text-slate-100 truncate" title={item.group || tour.name}>
+            {item.group || tour.name}
           </h2>
-          <span className="text-xs text-neutral-500 dark:text-neutral-400">
-            {item.round.time || 'Ongoing'}
-          </span>
+          <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
+            {tour.info?.format || 'High-level chess competition'}
+          </p>
         </div>
-        
-        <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-4 line-clamp-2">
-          {item.round.description || 'High-level chess competition with grandmasters'}
-        </p>
-        
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="w-6 h-6 rounded-full bg-blue-200 dark:bg-blue-800 flex items-center justify-center mr-2">
-              <span className="text-xs">♛</span>
-            </div>
-            <span className="text-xs text-neutral-600 dark:text-neutral-400">
-              {item.players || 'Grandmasters'}
-            </span>
-          </div>
-          
-          <a 
-            href={item.round.url}
+
+        {/* Players List */}
+        <div className="flex items-center gap-2 pt-3 text-slate-500 dark:text-slate-400">
+          <CrownIcon />
+          <p className="text-sm truncate" title={playersDisplay}>
+            {playersDisplay}
+          </p>
+        </div>
+
+        {/* Footer: Pushed to the bottom */}
+        <div className="mt-auto pt-4 flex items-center justify-between gap-4">
+          <span className="text-xs text-slate-500 dark:text-slate-500">
+            {new Date(round.startsAt).toLocaleDateString()}
+          </span>
+          <a
+            href={round.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full hover:shadow-md transition-shadow"
+            className="group inline-flex items-center justify-center gap-1.5 text-sm font-semibold bg-blue-600 text-white px-4 py-1.5 rounded-full hover:bg-blue-700 transition-colors"
           >
             Watch
+            <ArrowRightIcon />
           </a>
         </div>
       </div>

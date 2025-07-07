@@ -6,8 +6,6 @@ import { getTopBroadcasts } from './api/broadcast';
 import BroadcastGrid from './components/BroadcastGrid';
 import SkeletonLoader from './components/SkeletonLoader';
 
-
-
 export default function LivesPage() {
   const [active, setActive] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
@@ -17,10 +15,13 @@ export default function LivesPage() {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
+  // No changes needed in the data fetching logic
   const fetchBroadcasts = async (pageNumber = 1) => {
+    setLoading(pageNumber === 1);
+    setLoadingMore(pageNumber > 1);
+
     try {
       const data = await getTopBroadcasts(pageNumber);
-
       const activeData = data?.active || [];
       const upcomingData = data?.upcoming || [];
       const pastData = data?.past?.currentPageResults || [];
@@ -32,13 +33,13 @@ export default function LivesPage() {
       } else {
         setPast((prev) => [...prev, ...pastData]);
       }
-
       setHasNextPage(!!data?.past?.nextPage);
       setPage(pageNumber);
     } catch (err) {
       console.error("Error fetching broadcasts:", err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -46,28 +47,19 @@ export default function LivesPage() {
     fetchBroadcasts(1); 
   }, []);
 
-  const loadMore = async () => {
-    if (!hasNextPage) return;
-    setLoadingMore(true);
-    try {
-      await fetchBroadcasts(page + 1);
-    } catch (err) {
-      console.error('Failed to load more broadcasts:', err);
-    } finally {
-      setLoadingMore(false);
-    }
+  const loadMore = () => {
+    if (!hasNextPage || loadingMore) return;
+    fetchBroadcasts(page + 1);
   };
 
+  // CHANGE: The main page wrapper is now inside the SkeletonLoader
   if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <SkeletonLoader />
-      </div>
-    );
+    return <SkeletonLoader />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    // CHANGE: Added container to align content with Header/Footer
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="space-y-12">
         {!!active.length && (
           <BroadcastGrid 
@@ -80,7 +72,7 @@ export default function LivesPage() {
         {!!upcoming.length && (
           <BroadcastGrid 
             broadcasts={upcoming} 
-            title="Upcoming Matches" 
+            title="Upcoming" 
             isCarousel={true} 
           />
         )}
@@ -94,16 +86,17 @@ export default function LivesPage() {
 
         {hasNextPage && (
           <div className="flex justify-center mt-8">
+            {/* CHANGE: Updated button to match the new design system */}
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg disabled:opacity-70"
+              className="inline-flex items-center justify-center text-sm font-semibold bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed dark:disabled:bg-blue-800 transition-colors"
             >
               {loadingMore ? (
-                <span className="flex items-center">
-                  <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-r-2 border-white mr-2"></span>
+                <>
+                  <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></span>
                   Loading...
-                </span>
+                </>
               ) : (
                 'Load More'
               )}

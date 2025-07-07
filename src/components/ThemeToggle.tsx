@@ -2,25 +2,29 @@
 'use client';
 
 import { useTheme } from '@/context/ThemeProvider';
+import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <button 
+    <button
       onClick={toggleTheme}
-      className="relative w-14 h-8 rounded-full bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 p-1 transition-colors"
-      aria-label={`Toggle ${theme === 'light' ? 'dark' : 'light'} mode`}
+      className="relative w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
-      <div className={`absolute top-1 w-6 h-6 rounded-full bg-white dark:bg-yellow-300 shadow-md transform transition-transform ${
-        theme === 'light' ? 'translate-x-0' : 'translate-x-6'
-      }`}>
-        {theme === 'light' ? (
-          <span className="absolute inset-0 flex items-center justify-center text-yellow-500">☀️</span>
-        ) : (
-          <span className="absolute inset-0 flex items-center justify-center text-blue-800">🌙</span>
-        )}
-      </div>
+      {/* Sun Icon - Visible in Light Mode */}
+      <Sun
+        className={`w-5 h-5 transition-all duration-300 transform ${
+          theme === 'light' ? 'scale-100 rotate-0' : 'scale-0 -rotate-90'
+        }`}
+      />
+      {/* Moon Icon - Visible in Dark Mode */}
+      <Moon
+        className={`absolute w-5 h-5 transition-all duration-300 transform ${
+          theme === 'dark' ? 'scale-100 rotate-0' : 'scale-0 rotate-90'
+        }`}
+      />
     </button>
   );
 }

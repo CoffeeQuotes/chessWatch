@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "ChessWatch",
-  description: "Chess game tracker",
+  description: "Live chess tournament tracker",
 };
 
 export default function RootLayout({
@@ -18,10 +18,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
+      {/* CHANGE: Removed conflicting bg-white/dark:bg-black classes. Let globals.css handle it. */}
+      <body className="min-h-screen">
         <ThemeProvider>
           <Header />
-          <main className="container mx-auto p-4">
+          {/* CHANGE: Added padding top/bottom to prevent content from hiding under the fixed header/footer. */}
+          <main className="pt-24 pb-16">
             {children}
           </main>
           <Footer />
