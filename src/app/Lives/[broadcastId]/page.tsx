@@ -3,16 +3,17 @@ import { getBroadcast } from '../api/broadcast';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  Users,
+   Users,
   MapPin,
   Clock,
   Globe,
   Trophy,
-  Calendar,
-  ExternalLink,
+  ExternalLink, // We will replace this icon
   ShieldCheck,
   CheckCircle,
   Hourglass,
+  AlertTriangle,
+  ChevronRight, // --- CHANGE 1: Import the new icon ---
 } from 'lucide-react';
 
 // A type definition for our data for better TypeScript support
@@ -56,16 +57,16 @@ const InfoItem = ({
 
 // Main Page Component
 export default async function BroadcastPage({
-  params,
+  params: { broadcastId },
 }: {
   params: { broadcastId: string };
 }) {
   let broadcastData: BroadcastData | null = null;
   try {
     // Fetch data directly in the Server Component
-    broadcastData = await getBroadcast(params.broadcastId);
+    broadcastData = await getBroadcast(broadcastId);
   } catch (error) {
-    console.error(`Failed to fetch broadcast ${params.broadcastId}:`, error);
+    console.error(`Failed to fetch broadcast ${broadcastId}:`, error);
   }
 
   // Handle cases where data is not found or an error occurred
@@ -114,69 +115,69 @@ export default async function BroadcastPage({
           <section className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
             <h2 className="text-2xl font-semibold mb-4">Rounds</h2>
             <div className="space-y-3">
-  {rounds.map((round, index) => {
-    // --- THIS IS THE NEW LOGIC ---
-    const isFinished = round.finished;
-    const now = new Date();
-    const startTime = round.startsAt ? new Date(round.startsAt) : null;
-    
-    let status: 'finished' | 'live' | 'upcoming' = 'upcoming';
+              {rounds.map((round, index) => {
+                // --- THIS IS THE NEW LOGIC ---
+                const isFinished = round.finished;
+                const now = new Date();
+                const startTime = round.startsAt ? new Date(round.startsAt) : null;
 
-    if (isFinished) {
-      status = 'finished';
-    } else if (startTime && startTime <= now) {
-      // It has a start time and it has passed
-      status = 'live';
-    } else if (!startTime && round.startsAfterPrevious) {
-      // It's a tiebreak that starts after another round.
-      // We can assume it's live if the *previous* round in the array is finished.
-      if (index > 0 && rounds[index - 1].finished) {
-        status = 'live';
-      } else {
-        // If the previous round isn't finished, this one is still upcoming.
-        status = 'upcoming';
-      }
-    } else {
-      // Default to upcoming if it has a future start time or no info
-      status = 'upcoming';
-    }
+                let status: 'finished' | 'live' | 'upcoming' = 'upcoming';
 
-    return (
-      <a
-        key={round.id}
-        href={round.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-      >
-        <div>
-          <p className="font-medium text-slate-800 dark:text-slate-200">{round.name}</p>
-          {startTime && <p className="text-xs text-slate-500">{startTime.toLocaleString()}</p>}
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Use the new `status` variable to render the correct badge */}
-          {status === 'finished' && (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
-              <CheckCircle size={14} /> Finished
-            </span>
-          )}
-          {status === 'live' && (
-            <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 dark:text-red-400 animate-pulse">
-              <div className="relative flex h-2 w-2 mr-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></div>
-              LIVE
-            </span>
-          )}
-          {status === 'upcoming' && (
-             <span className="flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
-              <Hourglass size={14} /> Upcoming
-            </span>
-          )}
-          <ExternalLink size={16} className="text-slate-400 dark:text-slate-500" />
-        </div>
-      </a>
-    )
-  })}
-</div>
+                if (isFinished) {
+                  status = 'finished';
+                } else if (startTime && startTime <= now) {
+                  // It has a start time and it has passed
+                  status = 'live';
+                } else if (!startTime && round.startsAfterPrevious) {
+                  // It's a tiebreak that starts after another round.
+                  // We can assume it's live if the *previous* round in the array is finished.
+                  if (index > 0 && rounds[index - 1].finished) {
+                    status = 'live';
+                  } else {
+                    // If the previous round isn't finished, this one is still upcoming.
+                    status = 'upcoming';
+                  }
+                } else {
+                  // Default to upcoming if it has a future start time or no info
+                  status = 'upcoming';
+                }
+
+                return (
+                  <Link
+                    key={round.id}
+                    href={`/Lives/Games/${round.id}`}
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group"
+                  >
+                    <div>
+                      <p className="font-medium text-slate-800 dark:text-slate-200">{round.name}</p>
+                      {startTime && <p className="text-xs text-slate-500">{startTime.toLocaleString()}</p>}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {/* Use the new `status` variable to render the correct badge */}
+                      {status === 'finished' && (
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
+                          <CheckCircle size={14} /> Finished
+                        </span>
+                      )}
+                      {status === 'live' && (
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 dark:text-red-400 animate-pulse">
+                          <div className="relative flex h-2 w-2 mr-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></div>
+                          LIVE
+                        </span>
+                      )}
+                      {status === 'upcoming' && (
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                          <Hourglass size={14} /> Upcoming
+                        </span>
+                      )}
+                      <ChevronRight size={20} className="text-slate-400 dark:text-slate-500 group-hover:translate-x-1 transition-transform" />
+
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
 
           </section>
         </div>
@@ -203,11 +204,10 @@ export default async function BroadcastPage({
                   <Link
                     key={groupTour.id}
                     href={`/Lives/${groupTour.id}`}
-                    className={`block p-3 rounded-lg font-medium transition-colors ${
-                      groupTour.id === params.broadcastId
+                    className={`block p-3 rounded-lg font-medium transition-colors ${groupTour.id === broadcastId
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
                         : 'hover:bg-slate-200 dark:hover:bg-slate-800/50'
-                    }`}
+                      }`}
                   >
                     {groupTour.name}
                   </Link>

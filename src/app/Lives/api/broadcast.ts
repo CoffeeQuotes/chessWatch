@@ -19,9 +19,20 @@ export const getBroadcast = async (id: string) => {
       Accept: 'application/json',
     },
   });
-  console.log(response.data);
   return response.data;
 };
+
+// Get information about a broadcast round. https://lichess.org/api/broadcast/{broadcastTournamentSlug}/{broadcastRoundSlug}/{broadcastRoundId}
+
+export const getBroadcastRound = async (broadcastRoundId : string) => {
+  const response = await lichessApi.get(`/broadcast/-/-/${broadcastRoundId}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  return response.data;
+}
 
 export const getBroadcasts = async () => {
   const response = await lichessApi.get('/broadcast', {

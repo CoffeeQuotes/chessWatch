@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from './ChessImage';
-import Link from 'next/link'; // --- CHANGE 1: Import the Link component ---
+import Link from 'next/link'; 
 
 // Icons remain the same
 const Icon = ({ path, className }: { path: string; className?: string }) => (

@@ -6,20 +6,18 @@ const lichessApi = axios.create({
   baseURL: 'https://lichess.org/api',
   headers: {
     Accept: 'application/json',
+    // --- THIS IS THE RECOMMENDED ADDITION ---
+    // Identify your application. Replace with your actual domain or project name.
+    'User-Agent': 'ChessWatch/1.0 (https://github.com/CoffeeQuotes/chessWatch)',
   },
-  timeout: 10000, // Add a 10-second timeout
+  timeout: 10000,
 });
 
-// --- THIS IS THE NEW, MORE ROBUST FIX ---
-// Apply the retry logic to the lichessApi instance.
+// Apply the retry logic
 axiosRetry(lichessApi, {
-  retries: 3, // Retry up to 3 times
-  retryDelay: (retryCount) => {
-    // Use exponential backoff for delays
-    return retryCount * 1000; // 1s, 2s, 3s
-  },
+  retries: 3,
+  retryDelay: (retryCount) => retryCount * 1000,
   retryCondition: (error) => {
-    // Retry on network errors and 5xx server errors
     return (
       axiosRetry.isNetworkOrIdempotentRequestError(error) ||
       (error.response ? error.response.status >= 500 : false)
