@@ -23,7 +23,7 @@ export default function BroadcastCard({ item }: { item: any }) {
   const [imgSrc, setImgSrc] = useState(item.tour.image || "/chess-fallback.png");
 
   const { tour, round } = item;
-  const playersDisplay = (tour.info?.players || 'Top Players').split(/[,;]/).map(p => p.trim()).join(', ');
+  const playersDisplay = (tour.info?.players || 'Top Players').split(/[,;]/).map((p: string) => p.trim()).join(', ');
 
   return (
     <div
