@@ -10,7 +10,7 @@ import React from "react";
 type Player = {
   name: string;
   title?: string;
-  fed: string;
+  // fed: string;
   rating?: number;
 };
 

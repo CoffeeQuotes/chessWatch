@@ -26,7 +26,7 @@ const GameBoard = dynamic(
 );
 
 // Type definitions...
-type Player = { name: string; title?: string; rating?: number; fed?: string };
+type Player = { name: string; title?: string; rating?: number };
 type Game = { id: string; players: Player[]; status: string; fen: string };
 type RoundData = {
   round: { name: string; finished: boolean; startsAt?: number };
