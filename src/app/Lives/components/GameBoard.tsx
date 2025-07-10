@@ -4,7 +4,7 @@
 import { Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import React from "react";
-import Flag from "react-world-flags";
+// import Flag from "react-world-flags";
 
 // --- Type definitions ---
 type Player = {
@@ -150,7 +150,7 @@ const PlayerInfo = ({
       <Trophy
         className={`w-5 h-5 flex-shrink-0 ${isWinner ? "text-amber-400" : "text-transparent"}`}
       />
-      <Flag className="w-5 h-5 flex-shrink-0" code={player.fed} />
+      {/* <Flag className="w-5 h-5 flex-shrink-0" code={player.fed} /> */}
       <p
         className="font-semibold text-base text-slate-800 dark:text-white truncate max-w-[150px] sm:max-w-[180px] md:max-w-[200px]"
         title={player.name}
