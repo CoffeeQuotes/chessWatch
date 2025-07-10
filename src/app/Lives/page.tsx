@@ -6,22 +6,83 @@ import { getTopBroadcasts } from './api/broadcast';
 import BroadcastGrid from './components/BroadcastGrid';
 import SkeletonLoader from './components/SkeletonLoader';
 
+// ✅ Define proper types for API structure
+interface BroadcastTourInfo {
+  format: string;
+  tc: string;
+  fideTc: string;
+  location: string;
+  timeZone: string;
+  players?: string;
+  website?: string;
+  standings?: string;
+}
+
+interface BroadcastTour {
+  id: string;
+  name: string;
+  slug: string;
+  info: BroadcastTourInfo;
+  createdAt: number;
+  url: string;
+  tier: number;
+  dates: number[];
+  image: string;
+  teamTable?: boolean;
+}
+
+interface BroadcastRound {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: number;
+  rated: boolean;
+  startsAt: number;
+  finishedAt?: number;
+  finished?: boolean;
+  url?: string;
+}
+
+interface BroadcastItem {
+  tour: BroadcastTour;
+  round: BroadcastRound;
+  roundToLink?: BroadcastRound;
+  group?: string;
+}
+
+interface PastBroadcastItem {
+  tour: BroadcastTour;
+  round: BroadcastRound;
+  group?: string;
+}
+
+interface BroadcastsApiResponse {
+  active: BroadcastItem[];
+  upcoming: BroadcastItem[];
+  past: {
+    currentPage: number;
+    maxPerPage: number;
+    currentPageResults: PastBroadcastItem[];
+    previousPage: number | null;
+    nextPage: number | null;
+  };
+}
+
 export default function LivesPage() {
-  const [active, setActive] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
-  const [past, setPast] = useState([]);
+  const [active, setActive] = useState<BroadcastItem[]>([]);
+  const [upcoming, setUpcoming] = useState<BroadcastItem[]>([]);
+  const [past, setPast] = useState<PastBroadcastItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // No changes needed in the data fetching logic
   const fetchBroadcasts = async (pageNumber = 1) => {
     setLoading(pageNumber === 1);
     setLoadingMore(pageNumber > 1);
 
     try {
-      const data = await getTopBroadcasts(pageNumber);
+      const data: BroadcastsApiResponse = await getTopBroadcasts(pageNumber);
       const activeData = data?.active || [];
       const upcomingData = data?.upcoming || [];
       const pastData = data?.past?.currentPageResults || [];
@@ -52,13 +113,11 @@ export default function LivesPage() {
     fetchBroadcasts(page + 1);
   };
 
-  // CHANGE: The main page wrapper is now inside the SkeletonLoader
   if (loading) {
     return <SkeletonLoader />;
   }
 
   return (
-    // CHANGE: Added container to align content with Header/Footer
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="space-y-12">
         {!!active.length && (
@@ -86,7 +145,6 @@ export default function LivesPage() {
 
         {hasNextPage && (
           <div className="flex justify-center mt-8">
-            {/* CHANGE: Updated button to match the new design system */}
             <button
               onClick={loadMore}
               disabled={loadingMore}
