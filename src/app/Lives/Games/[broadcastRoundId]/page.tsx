@@ -1,19 +1,20 @@
 // src/app/Lives/Games/[broadcastRoundId]/page.tsx
+
 import { getBroadcastRound } from "../../api/broadcast";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import GamesClientView from "./components/GamesClientView";
 
-type PageProps = {
+type Props = {
   params: {
     broadcastRoundId: string;
   };
 };
-// This is a pure Server Component. Its only job is to fetch data.
-export default async function BroadcastRoundPage({ params }: PageProps) {
-  const { broadcastRoundId } = params; // This is the correct way to access params here.
 
-  let roundData: Awaited<ReturnType<typeof getBroadcastRound>> | null = null;
+export default async function BroadcastRoundPage({ params }: Props) {
+  const { broadcastRoundId } = params;
+
+  let roundData = null;
   try {
     roundData = await getBroadcastRound(broadcastRoundId);
   } catch (error) {
@@ -54,6 +55,5 @@ export default async function BroadcastRoundPage({ params }: PageProps) {
     );
   }
 
-  // On success, pass the data to the client component.
   return <GamesClientView roundData={roundData} />;
 }
