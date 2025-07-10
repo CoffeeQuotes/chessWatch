@@ -4,13 +4,13 @@
 import { Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 import React from "react";
-// import Flag from "react-world-flags";
+import Flag from "react-world-flags";
 
 // --- Type definitions ---
 type Player = {
   name: string;
   title?: string;
-  // fed: string;
+  fed: string;
   rating?: number;
 };
 
@@ -137,7 +137,6 @@ const pieceComponentMap: { [key: string]: React.FC } = {
   k: BlackKing,
 };
 
-// PlayerInfo helper component is correct.
 const PlayerInfo = ({
   player,
   isWinner,
@@ -145,12 +144,12 @@ const PlayerInfo = ({
   player: Player;
   isWinner: boolean;
 }) => (
-  <div className="flex flex-col items-start sm:items-center text-left sm:text-center space-y-1">
+  <div className="flex flex-col items-center text-center space-y-1">
     <div className="flex items-center gap-2 min-w-0">
       <Trophy
         className={`w-5 h-5 flex-shrink-0 ${isWinner ? "text-amber-400" : "text-transparent"}`}
       />
-      {/* <Flag className="w-5 h-5 flex-shrink-0" code={player.fed} /> */}
+      <Flag className="w-5 h-5 flex-shrink-0" code={player.fed} />
       <p
         className="font-semibold text-base text-slate-800 dark:text-white truncate max-w-[150px] sm:max-w-[180px] md:max-w-[200px]"
         title={player.name}
@@ -163,6 +162,7 @@ const PlayerInfo = ({
     </p>
   </div>
 );
+
 
 //==============================================================================
 // The Custom Chess Board Component
@@ -264,7 +264,7 @@ export default function GameBoard({
   const blackWon = status === "0-1";
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 items-stretch md:items-start p-4 sm:p-6 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl shadow-lg max-w-5xl mx-auto">
+    <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-4 sm:p-6 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl shadow-lg max-w-5xl mx-auto">
       {/* LEFT INFO PANE */}
       <div className="flex-1 flex flex-col justify-between">
         <div className="space-y-4">
@@ -275,7 +275,8 @@ export default function GameBoard({
           <PlayerInfo player={blackPlayer} isWinner={blackWon} />
         </div>
 
-        <div className="mt-6 text-left sm:text-center">
+        {/* FIXED: text-center is now the default */}
+        <div className="mt-6 text-center">
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Final Result
           </p>
