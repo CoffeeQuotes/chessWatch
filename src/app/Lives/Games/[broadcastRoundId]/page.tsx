@@ -5,13 +5,14 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import GamesClientView from "./components/GamesClientView";
 
-// ✅ Define props plainly without any "extends" or constraints
+// ✅ Updated for Next.js 15 - params is now a Promise
 export default async function BroadcastRoundPage({
   params,
 }: {
-  params: { broadcastRoundId: string };
+  params: Promise<{ broadcastRoundId: string }>;
 }) {
-  const { broadcastRoundId } = params;
+  // Await the params Promise
+  const { broadcastRoundId } = await params;
 
   let roundData = null;
   try {
