@@ -4,12 +4,13 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import GamesClientView from "./components/GamesClientView";
 
+type PageProps = {
+  params: {
+    broadcastRoundId: string;
+  };
+};
 // This is a pure Server Component. Its only job is to fetch data.
-export default async function BroadcastRoundPage({
-  params,
-}: {
-  params: { broadcastRoundId: string };
-}) {
+export default async function BroadcastRoundPage({ params }: PageProps) {
   const { broadcastRoundId } = params; // This is the correct way to access params here.
 
   let roundData: Awaited<ReturnType<typeof getBroadcastRound>> | null = null;
