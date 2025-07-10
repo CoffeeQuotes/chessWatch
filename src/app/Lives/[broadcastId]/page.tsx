@@ -253,7 +253,7 @@ export default async function BroadcastPage({
             <section className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
               <h2 className="text-2xl font-semibold mb-4">{group.name}</h2>
               <div className="space-y-2">
-                {group.tours.map((groupTour) => (
+                {group.tours.map((groupTour: {id: string; name: string;}) => (
                   <Link
                     key={groupTour.id}
                     href={`/Lives/${groupTour.id}`}

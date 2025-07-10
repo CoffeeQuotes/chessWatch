@@ -34,15 +34,15 @@ export const getBroadcastRound = async (broadcastRoundId : string) => {
   return response.data;
 }
 
-export const getBroadcasts = async () => {
-  const response = await lichessApi.get('/broadcast', {
-    responseType: 'text', // Important!
-    headers: {
-      Accept: 'application/x-ndjson', // NDJSON stream
-    },
-  });
+// export const getBroadcasts = async () => {
+//   const response = await lichessApi.get('/broadcast', {
+//     responseType: 'text', // Important!
+//     headers: {
+//       Accept: 'application/x-ndjson', // NDJSON stream
+//     },
+//   });
 
-  const lines = response.data.trim().split('\n');
-  const broadcasts = lines.map((line) => JSON.parse(line));
-  return broadcasts;
-};
+//   const lines = response.data.trim().split('\n');
+//   const broadcasts = lines.map((line) => JSON.parse(line));
+//   return broadcasts;
+// };
