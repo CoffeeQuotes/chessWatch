@@ -1,9 +1,9 @@
 // src/app/Lives/[broadcastId]/page.tsx
-import { getBroadcast } from '../api/broadcast';
-import Image from 'next/image';
-import Link from 'next/link';
+import { getBroadcast } from "../api/broadcast";
+import Image from "next/image";
+import Link from "next/link";
 import {
-   Users,
+  Users,
   MapPin,
   Clock,
   Globe,
@@ -14,7 +14,7 @@ import {
   Hourglass,
   AlertTriangle,
   ChevronRight, // --- CHANGE 1: Import the new icon ---
-} from 'lucide-react';
+} from "lucide-react";
 
 // A type definition for our data for better TypeScript support
 type BroadcastData = Awaited<ReturnType<typeof getBroadcast>>;
@@ -37,7 +37,9 @@ const InfoItem = ({
     <div className="flex items-start gap-4">
       <Icon className="h-5 w-5 text-slate-500 dark:text-slate-400 mt-1 flex-shrink-0" />
       <div>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</p>
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+          {label}
+        </p>
         {isLink ? (
           <a
             href={value}
@@ -45,22 +47,27 @@ const InfoItem = ({
             rel="noopener noreferrer"
             className="text-sm text-blue-600 hover:underline dark:text-blue-400 break-words"
           >
-            {value.split('//')[1] || value}
+            {value.split("//")[1] || value}
           </a>
         ) : (
-          <p className="text-sm text-slate-800 dark:text-slate-100 break-words">{value}</p>
+          <p className="text-sm text-slate-800 dark:text-slate-100 break-words">
+            {value}
+          </p>
         )}
       </div>
     </div>
   );
 };
 
-// Main Page Component
+// Main Page Component - ✅ Updated for Next.js 15
 export default async function BroadcastPage({
-  params: { broadcastId },
+  params,
 }: {
-  params: { broadcastId: string };
+  params: Promise<{ broadcastId: string }>;
 }) {
+  // Await the params Promise
+  const { broadcastId } = await params;
+
   let broadcastData: BroadcastData | null = null;
   try {
     // Fetch data directly in the Server Component
@@ -94,7 +101,7 @@ export default async function BroadcastPage({
       {/* Hero Section with Banner Image */}
       <div className="relative h-64 md:h-80 w-full rounded-2xl overflow-hidden mb-8">
         <Image
-          src={tour.image || '/chess-fallback.png'}
+          src={tour.image || "/chess-fallback.png"}
           alt={tour.name}
           fill
           priority
@@ -119,27 +126,29 @@ export default async function BroadcastPage({
                 // --- THIS IS THE NEW LOGIC ---
                 const isFinished = round.finished;
                 const now = new Date();
-                const startTime = round.startsAt ? new Date(round.startsAt) : null;
+                const startTime = round.startsAt
+                  ? new Date(round.startsAt)
+                  : null;
 
-                let status: 'finished' | 'live' | 'upcoming' = 'upcoming';
+                let status: "finished" | "live" | "upcoming" = "upcoming";
 
                 if (isFinished) {
-                  status = 'finished';
+                  status = "finished";
                 } else if (startTime && startTime <= now) {
                   // It has a start time and it has passed
-                  status = 'live';
+                  status = "live";
                 } else if (!startTime && round.startsAfterPrevious) {
                   // It's a tiebreak that starts after another round.
                   // We can assume it's live if the *previous* round in the array is finished.
                   if (index > 0 && rounds[index - 1].finished) {
-                    status = 'live';
+                    status = "live";
                   } else {
                     // If the previous round isn't finished, this one is still upcoming.
-                    status = 'upcoming';
+                    status = "upcoming";
                   }
                 } else {
                   // Default to upcoming if it has a future start time or no info
-                  status = 'upcoming';
+                  status = "upcoming";
                 }
 
                 return (
@@ -150,35 +159,45 @@ export default async function BroadcastPage({
                     className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group"
                   >
                     <div>
-                      <p className="font-medium text-slate-800 dark:text-slate-200">{round.name}</p>
-                      {startTime && <p className="text-xs text-slate-500">{startTime.toLocaleString()}</p>}
+                      <p className="font-medium text-slate-800 dark:text-slate-200">
+                        {round.name}
+                      </p>
+                      {startTime && (
+                        <p className="text-xs text-slate-500">
+                          {startTime.toLocaleString()}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-4">
                       {/* Use the new `status` variable to render the correct badge */}
-                      {status === 'finished' && (
+                      {status === "finished" && (
                         <span className="flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
                           <CheckCircle size={14} /> Finished
                         </span>
                       )}
-                      {status === 'live' && (
+                      {status === "live" && (
                         <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 dark:text-red-400 animate-pulse">
-                          <div className="relative flex h-2 w-2 mr-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span></div>
+                          <div className="relative flex h-2 w-2 mr-1">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                          </div>
                           LIVE
                         </span>
                       )}
-                      {status === 'upcoming' && (
+                      {status === "upcoming" && (
                         <span className="flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
                           <Hourglass size={14} /> Upcoming
                         </span>
                       )}
-                      <ChevronRight size={20} className="text-slate-400 dark:text-slate-500 group-hover:translate-x-1 transition-transform" />
-
+                      <ChevronRight
+                        size={20}
+                        className="text-slate-400 dark:text-slate-500 group-hover:translate-x-1 transition-transform"
+                      />
                     </div>
                   </Link>
-                )
+                );
               })}
             </div>
-
           </section>
         </div>
 
@@ -187,12 +206,34 @@ export default async function BroadcastPage({
           {/* Tournament Info Panel */}
           <section className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5">
             <h2 className="text-2xl font-semibold mb-2">Details</h2>
-            <InfoItem icon={ShieldCheck} label="Format" value={tour.info.format} />
+            <InfoItem
+              icon={ShieldCheck}
+              label="Format"
+              value={tour.info.format}
+            />
             <InfoItem icon={Clock} label="Time Control" value={tour.info.tc} />
-            <InfoItem icon={MapPin} label="Location" value={tour.info.location} />
-            <InfoItem icon={Users} label="Key Players" value={tour.info.players} />
-            <InfoItem icon={Globe} label="Website" value={tour.info.website} isLink />
-            <InfoItem icon={Trophy} label="Standings" value={tour.info.standings} isLink />
+            <InfoItem
+              icon={MapPin}
+              label="Location"
+              value={tour.info.location}
+            />
+            <InfoItem
+              icon={Users}
+              label="Key Players"
+              value={tour.info.players}
+            />
+            <InfoItem
+              icon={Globe}
+              label="Website"
+              value={tour.info.website}
+              isLink
+            />
+            <InfoItem
+              icon={Trophy}
+              label="Standings"
+              value={tour.info.standings}
+              isLink
+            />
           </section>
 
           {/* Related Tours Panel */}
@@ -204,10 +245,11 @@ export default async function BroadcastPage({
                   <Link
                     key={groupTour.id}
                     href={`/Lives/${groupTour.id}`}
-                    className={`block p-3 rounded-lg font-medium transition-colors ${groupTour.id === broadcastId
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-                        : 'hover:bg-slate-200 dark:hover:bg-slate-800/50'
-                      }`}
+                    className={`block p-3 rounded-lg font-medium transition-colors ${
+                      groupTour.id === broadcastId
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                        : "hover:bg-slate-200 dark:hover:bg-slate-800/50"
+                    }`}
                   >
                     {groupTour.name}
                   </Link>
