@@ -18,7 +18,19 @@ import {
 
 // A type definition for our data for better TypeScript support
 type BroadcastData = Awaited<ReturnType<typeof getBroadcast>>;
-
+interface Round {
+  startsAfterPrevious: boolean;
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: number;
+  rated: boolean;
+  finishedAt: number;
+  finished: boolean;
+  startsAt: number;
+  url: string;
+    
+}
 // Helper component for displaying key-value information with an icon
 const InfoItem = ({
   icon: Icon,
@@ -122,7 +134,7 @@ export default async function BroadcastPage({
           <section className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
             <h2 className="text-2xl font-semibold mb-4">Rounds</h2>
             <div className="space-y-3">
-              {rounds.map((round, index) => {
+              {rounds.map((round : Round, index : number) => {
                 // --- THIS IS THE NEW LOGIC ---
                 const isFinished = round.finished;
                 const now = new Date();
