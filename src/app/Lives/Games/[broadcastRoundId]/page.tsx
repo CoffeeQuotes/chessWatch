@@ -5,13 +5,12 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import GamesClientView from "./components/GamesClientView";
 
-type Props = {
-  params: {
-    broadcastRoundId: string;
-  };
-};
-
-export default async function BroadcastRoundPage({ params }: Props) {
+// ✅ Define props plainly without any "extends" or constraints
+export default async function BroadcastRoundPage({
+  params,
+}: {
+  params: { broadcastRoundId: string };
+}) {
   const { broadcastRoundId } = params;
 
   let roundData = null;
