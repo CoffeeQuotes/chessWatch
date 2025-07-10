@@ -4,6 +4,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Flag from "react-world-flags";
 import {
   Search,
   ChevronLeft,
@@ -15,15 +16,17 @@ import {
 } from "lucide-react";
 
 const GameBoard = dynamic(
-  () => import('../../../components/GameBoard').then((mod) => mod.default),
-  { 
+  () => import("../../../components/GameBoard").then((mod) => mod.default),
+  {
     ssr: false,
-    loading: () => <div className="w-full h-[450px] bg-slate-200 dark:bg-slate-800 animate-pulse rounded-lg" />
-  }
+    loading: () => (
+      <div className="w-full h-[450px] bg-slate-200 dark:bg-slate-800 animate-pulse rounded-lg" />
+    ),
+  },
 );
 
 // Type definitions...
-type Player = { name: string; title?: string; rating?: number };
+type Player = { name: string; title?: string; rating?: number; fed?: string };
 type Game = { id: string; players: Player[]; status: string; fen: string };
 type RoundData = {
   round: { name: string; finished: boolean; startsAt?: number };
@@ -215,6 +218,7 @@ const PlayerInfo = ({
     <Trophy
       className={`w-4 h-4 flex-shrink-0 ${isWinner ? "text-amber-500" : "text-transparent"}`}
     />{" "}
+    <Flag className="w-5 h-5 flex-shrink-0" code={player.fed} />
     <p
       className={`font-medium truncate ${isWinner ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-300"}`}
       title={player.name}
