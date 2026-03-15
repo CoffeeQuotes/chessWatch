@@ -27,12 +27,14 @@ const GameBoard = dynamic(
 
 // Type definitions...
 type Player = { name: string; title?: string; rating?: number; fed: string };
-type Game = { id: string; players: Player[]; status: string; fen: string };
+type Game = { id: string; players: Player[]; status: string; fen: string; pgn?: string };
 type RoundData = {
-  round: { name: string; finished: boolean; startsAt?: number };
+  round: { id: string; name: string; finished: boolean; startsAt?: number };
   tour: { id: string; name: string };
   games: Game[];
 };
+
+import { getGamePGN } from "../../../api/broadcast";
 
 export default function GamesClientView({
   roundData,
@@ -42,7 +44,31 @@ export default function GamesClientView({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [isLoadingPGN, setIsLoadingPGN] = useState(false);
   const GAMES_PER_PAGE = 10;
+
+  useEffect(() => {
+    let isMounted = true;
+    if (selectedGame) {
+      const updatedGame = roundData.games.find((g) => g.id === selectedGame.id);
+      if (updatedGame && updatedGame.fen !== selectedGame.fen) {
+        getGamePGN(roundData.round.id, updatedGame.id).then((newPgn) => {
+          if (isMounted) {
+            setSelectedGame((prev) =>
+              prev ? { ...prev, fen: updatedGame.fen, status: updatedGame.status, pgn: newPgn } : null
+            );
+          }
+        }).catch(() => {
+          if (isMounted) {
+            setSelectedGame((prev) =>
+              prev ? { ...prev, fen: updatedGame.fen, status: updatedGame.status } : null
+            );
+          }
+        });
+      }
+    }
+    return () => { isMounted = false; };
+  }, [roundData.games, roundData.round.id, selectedGame?.id, selectedGame?.fen]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -128,7 +154,9 @@ export default function GamesClientView({
                 <GameItem
                     key={game.id}
                     game={game}
+                    roundId={roundData.round.id}
                     onGameSelect={setSelectedGame}
+                    setIsLoadingPGN={setIsLoadingPGN}
                 />
                 ))}
             </div>
@@ -142,33 +170,46 @@ export default function GamesClientView({
         </div>
       </div>
 
-      {selectedGame && (
+      {(selectedGame || isLoadingPGN) && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-sm overflow-y-auto"
           onClick={() => setSelectedGame(null)}
         >
           <div
-            className="relative w-full max-w-5xl" // Changed max-w to fit GameBoard
+            className="relative w-full max-w-5xl my-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setSelectedGame(null)}
-              className="absolute -top-3 -right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-slate-700 text-white hover:bg-slate-600"
-              aria-label="Close"
-            >
-              <X size={20} />
-            </button>
+            {isLoadingPGN ? (
+              <div className="w-full h-64 flex items-center justify-center bg-[#111827] rounded-2xl border border-white/10 shadow-2xl">
+                 <div className="flex flex-col items-center gap-4 text-slate-400">
+                    <Hourglass className="w-8 h-8 animate-spin text-blue-500" />
+                    <p className="font-medium animate-pulse">Loading Game Data...</p>
+                 </div>
+              </div>
+            ) : selectedGame && (
+              <div className="relative">
+                <button
+                  onClick={() => setSelectedGame(null)}
+                  className="absolute -top-3 -right-3 z-[70] w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 shadow-2xl"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
 
-            <GameBoard
-              key={selectedGame.id}
-              fen={selectedGame.fen}
-              whitePlayer={selectedGame.players[0]}
-              blackPlayer={selectedGame.players[1]}
-              status={selectedGame.status}
-            />
+                <GameBoard
+                  key={selectedGame.id}
+                  fen={selectedGame.fen}
+                  pgn={selectedGame.pgn || null}
+                  whitePlayer={selectedGame.players[0]}
+                  blackPlayer={selectedGame.players[1]}
+                  status={selectedGame.status}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
+
     </>
   );
 }
@@ -176,15 +217,41 @@ export default function GamesClientView({
 // FIXED: This component now uses flex-col on small screens to prevent name truncation.
 function GameItem({
   game,
+  roundId,
   onGameSelect,
+  setIsLoadingPGN,
 }: {
   game: Game;
+  roundId: string;
   onGameSelect: (game: Game) => void;
+  setIsLoadingPGN?: (loading: boolean) => void;
 }) {
   const [white, black] = game.players;
+  
+  const handleSelect = async () => {
+    // If we already have the PGN, use it directly
+    if (game.pgn && game.pgn.trim()) {
+      onGameSelect(game);
+      return;
+    }
+
+    // Fetch PGN from Lichess study chapter endpoint
+    if (setIsLoadingPGN) setIsLoadingPGN(true);
+    try {
+      const pgn = await getGamePGN(roundId, game.id);
+      onGameSelect({ ...game, pgn });
+    } catch (e) {
+      console.error("Failed to load PGN:", e);
+      // Open with just FEN — board will still show current position
+      onGameSelect(game);
+    } finally {
+      if (setIsLoadingPGN) setIsLoadingPGN(false);
+    }
+  };
+
   return (
     <button
-      onClick={() => onGameSelect(game)}
+      onClick={handleSelect}
       className="w-full text-left p-4 rounded-lg bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group"
     >
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">

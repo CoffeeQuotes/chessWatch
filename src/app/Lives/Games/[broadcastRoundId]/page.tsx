@@ -11,11 +11,11 @@ export default async function BroadcastRoundPage({
 }: {
   params: Promise<{ broadcastRoundId: string }>;
 }) {
-  // Await the params Promise
   const { broadcastRoundId } = await params;
 
   let roundData = null;
   try {
+    // getBroadcastRound already returns game.pgn for each game in the round
     roundData = await getBroadcastRound(broadcastRoundId);
   } catch (error) {
     console.error(`Failed to fetch round ${broadcastRoundId}:`, error);
@@ -55,5 +55,7 @@ export default async function BroadcastRoundPage({
     );
   }
 
+  // The Lichess broadcast round API already includes pgn for each game.
+  // Simply pass roundData directly — no separate PGN fetch needed.
   return <GamesClientView roundData={roundData} />;
 }
